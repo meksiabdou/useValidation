@@ -126,10 +126,13 @@ const useValidation = ({
       }
     }
 
+    //console.log(_status);
+    
+
     setErrors(errorsList)
-    setStatus(!_status.includes(false))
+    setStatus(!(_status.length === 0 || _status.includes(false)))
     // eslint-disable-next-line standard/no-callback-literal
-    return callback(!_status.includes(false), event)
+    return callback(!(_status.length === 0 || _status.includes(false)), event)
   }
 
   const handelOnChange = (
