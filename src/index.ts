@@ -43,8 +43,10 @@ const useValidation = ({
       error?: string
     }
 
+    value = value?.toString()?.trim();
+
     try {
-      if (value.toString().trim() === '') {
+      if (value === '') {
         result = {
           status: false,
           error: 'The field is required'
@@ -79,7 +81,7 @@ const useValidation = ({
       }
     }
 
-    return result
+    return result;
   }
 
   const handelOnSubmit = (
@@ -154,8 +156,8 @@ const useValidation = ({
     }
 
     if (name === 'confirmPassword') {
-      if (data.password) {
-        if (data.password === value) {
+      if (data.password?.trim()) {
+        if (data.password?.trim() === value?.trim()) {
           result = {
             status: true
           }
@@ -193,7 +195,7 @@ const useValidation = ({
 
     setData({
       ...data,
-      [name]: value?.trim()
+      [name]: value
     })
   }
 
@@ -215,7 +217,7 @@ const useValidation = ({
 
       Object.keys(textarea).map((key) => {
         if (textarea[key].name) {
-          dataInput[textarea[key].name] = textarea[key].value?.trim()
+          dataInput[textarea[key].name] = textarea[key].value
         }
         return true
       })
