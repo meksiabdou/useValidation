@@ -7,7 +7,7 @@
 ## Install
 
 ```bash
-yarn add https://github.com/meksiabdou/usevalidation
+yarn add https://github.com/meksiabdou/usevalidation.git#v2
 ```
 
 ## Usage
