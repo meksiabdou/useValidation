@@ -1,13 +1,114 @@
-import React from 'react'
-import useValidation from '@meksiabdou/usevalidation'
+import React from 'react';
+import useValidation, {ValidationInputType} from '@meksiabdou/usevalidation';
+
+
+interface InputProps extends ValidationInputType  {
+  placeholder?: string;
+}
 
 const App = () => {
+  const inputs: Array<InputProps> = [
+    {
+      name: 'name',
+      type: 'text',
+      defaultValue: 'Mohamed',
+      placeholder: 'name',
+      required: true,
+      //regex: '',
+      messages: {
+        required: 'the is required',
+      }
+    },
+    {
+      name: 'email',
+      type: 'text',
+      placeholder: 'email',
+      defaultValue: 'mohamed@example.com',
+      regex: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+      required: true,
+      messages: {
+        required: '',
+        regex: 'the is invalid'
+      }
+    },
+    {
+      name: 'phone',
+      type: 'text',
+      placeholder: 'phone',
+      defaultValue: '0552000000',
+      regex: /^[0]{1}[5-7]{1}[0-9]{8}$/m,
+      required: true,
+      messages: {
+        required: '',
+        regex: ''
+      }
+    },
+    {
+      name: 'password',
+      type: 'password',
+      defaultValue: '',
+      placeholder: 'password',
+      required: true,
+      //regex: '',
+      minLength: 8,
+      maxLength: 20,
+      messages: {
+        required: '',
+        regex: '',
+        min: '',
+        max: '',
+        minLength: '',
+        maxLength: ''
+      }
+    },
+    {
+      name: 'confirm-password',
+      type: 'password',
+      defaultValue: '',
+      placeholder: 'confirm password',
+      required: true,
+      //regex: '',
+      match: 'password',
+      messages: {
+        regex: '',
+        match: ''
+      }
+    },
+    {
+      name: 'amount',
+      type: 'text',
+      defaultValue: '',
+      placeholder: 'amount',
+      //regex: '',
+      min: 8,
+      max: 20,
+      messages: {
+        regex: '',
+        match: '',
+        min: '',
+        max: ''
+      }
+    },
+    {
+      name: 'message',
+      type: 'textarea',
+      defaultValue: '',
+      placeholder: 'message',
+      //regex: '',
+      messages: {
+        required: '',
+        regex: '',
+        match: ''
+      }
+    }
+  ];
+
   const { errors, handelOnSubmit, refForm, handelOnChange, data } =
-    useValidation({})
+    useValidation(inputs);
 
   const onSubmit = (status: boolean) => {
-    console.log(status, data)
-  }
+    console.log(status, data, errors);
+  };
 
   return (
     <div
@@ -20,89 +121,56 @@ const App = () => {
     >
       <form onSubmit={(event) => handelOnSubmit(event, onSubmit)} ref={refForm}>
         <div className='title'>
-          <h4>{'Login'}</h4>
-        </div>
-        <div className='form-group'>
-          <span className='error form-text'>
-            {errors.email && errors.email}
-          </span>
-          <div className={`input-group`}>
-            <input
-              type='email'
-              name='email'
-              defaultValue='contact@example.com'
-              className={`form-control`}
-              onChange={handelOnChange}
-              placeholder={'email'}
-            />
-          </div>
+          <h4>{'Form'}</h4>
         </div>
 
+        {inputs.map((item) => {
+          return (
+            <div
+              className='form-group'
+              style={{ marginBottom: 10 }}
+              key={item.name}
+            >
+              <p
+                className='error form-text'
+                style={{ color: '#ff0000', marginBottom: 5 }}
+              >
+                {errors[item.name] && errors[item.name]}
+              </p>
+              <div className={`input-group`}>
+                {item.type === 'textarea' ? (
+                  <textarea
+                    name={item.name}
+                    defaultValue={item.defaultValue}
+                    className={`form-control`}
+                    onChange={handelOnChange}
+                    placeholder={item.placeholder}
+                    //required={item.required}
+                    style={{ minHeight: 100, minWidth: 200 }}
+                  />
+                ) : (
+                  <input
+                    type={item.type}
+                    name={item.name}
+                    defaultValue={item.defaultValue}
+                    className={`form-control`}
+                    onChange={handelOnChange}
+                    placeholder={item.placeholder}
+                    //required={item.required}
+                    style={{ minHeight: 35, width: 200 }}
+                  />
+                )}
+              </div>
+            </div>
+          );
+        })}
         <br />
-
-        <div>
-          <span className='error form-text'>
-            {errors.password && errors.password}
-          </span>
-          <div className={`input-group`}>
-            <input
-              type={'password'}
-              name='password'
-              defaultValue=''
-              className={`form-control ${errors.password ? 'input-error' : ''}`}
-              onChange={handelOnChange}
-              placeholder={'password'}
-            />
-          </div>
-        </div>
-
-        <br />
-
-        <div>
-          <span className='error form-text'>
-            {errors.confirmPassword && errors.confirmPassword}
-          </span>
-          <div className={`input-group`}>
-            <input
-              type={'password'}
-              name='confirmPassword'
-              defaultValue=''
-              className={`form-control ${
-                errors.confirmPassword ? 'input-error' : ''
-              }`}
-              onChange={handelOnChange}
-              placeholder={'Confirm Password'}
-            />
-          </div>
-        </div>
-
-        <br />
-
-        <div>
-          <span className='error form-text'>
-            {(errors as any).information && (errors as any).information}
-          </span>
-          <div className={`input-group`}>
-            <textarea
-              //type={'password'}
-              name='information'
-              defaultValue=''
-              value={data['information']}
-              className={`form-control ${
-                (errors as any).information ? 'input-error' : ''
-              }`}
-              onChange={handelOnChange}
-              placeholder={'information'}
-            />
-          </div>
-        </div>
-
         <button type='submit' className='btn btn-default btn-submit'>
           login
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
