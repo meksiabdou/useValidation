@@ -1,13 +1,12 @@
-import React from 'react';
-import useValidation, {ValidationInputType} from '@meksiabdou/usevalidation';
+import React, { useState } from 'react';
+import useValidation, { ValidationInputType } from '@meksiabdou/usevalidation';
 
-
-interface InputProps extends ValidationInputType  {
+interface InputProps extends ValidationInputType {
   placeholder?: string;
 }
 
 const App = () => {
-  const inputs: Array<InputProps> = [
+  const _inputs: Array<InputProps> = [
     {
       name: 'name',
       type: 'text',
@@ -16,7 +15,7 @@ const App = () => {
       required: true,
       //regex: '',
       messages: {
-        required: 'the is required',
+        required: 'the field is required'
       }
     },
     {
@@ -28,7 +27,7 @@ const App = () => {
       required: true,
       messages: {
         required: '',
-        regex: 'the is invalid'
+        regex: 'the field is invalid'
       }
     },
     {
@@ -103,8 +102,25 @@ const App = () => {
     }
   ];
 
+  const [inputs, setInputs] = useState<Array<InputProps>>(_inputs);
+
   const { errors, handelOnSubmit, refForm, handelOnChange, data } =
     useValidation(inputs);
+
+  const addNewInput = () => {
+    const name = 'input-' + Number((Math.random() * 1000).toFixed(0));
+    setInputs([
+      ...inputs,
+      {
+        name: name,
+        type: 'text',
+        defaultValue: Math.random() * 100,
+        placeholder: name,
+        required: true,
+        regex: /^[\d.]+$/m
+      }
+    ]);
+  };
 
   const onSubmit = (status: boolean) => {
     console.log(status, data, errors);
@@ -124,12 +140,12 @@ const App = () => {
           <h4>{'Form'}</h4>
         </div>
 
-        {inputs.map((item) => {
+        {inputs.map((item, index) => {
           return (
             <div
               className='form-group'
               style={{ marginBottom: 10 }}
-              key={item.name}
+              key={index.toString()}
             >
               <p
                 className='error form-text'
@@ -167,6 +183,15 @@ const App = () => {
         <br />
         <button type='submit' className='btn btn-default btn-submit'>
           login
+        </button>
+        <br />
+        <br />
+        <button
+          type='button'
+          className='btn btn-default btn-submit'
+          onClick={addNewInput}
+        >
+          Add new input
         </button>
       </form>
     </div>

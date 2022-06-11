@@ -24,7 +24,7 @@ export interface ValidationInputType {
   };
 }
 
-const messages = {
+const defaultMessages = {
   regex: 'the {field} is invalid',
   min: '{field} should be more or equal than {min}',
   max: '{field} must be less than or equal to {max}',
@@ -53,62 +53,66 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
         (item) => item.name.toLowerCase() === name?.toLowerCase()
       );
       if (field) {
-        if (field.required && isEmpty(value)) {
+        const {
+          required,
+          match,
+          max,
+          min,
+          maxLength,
+          minLength,
+          messages,
+          regex
+        } = field;
+        if (required && isEmpty(value)) {
           errorsList[name] =
-            field.messages?.required ||
-            messages.required.replace('{field}', name);
+            messages?.required ||
+            defaultMessages.required.replace('{field}', name);
         } else if (
-          !field.required &&
-          field.match &&
-          data?.[field.match] &&
-          value !== data?.[field.match]
+          !required &&
+          match &&
+          data?.[match] &&
+          value !== data?.[match]
         ) {
           errorsList[name] =
-            field.messages?.match ||
-            messages.match.replace('{match}', field.match);
-        } else if (!field.required && isEmpty(value)) {
+            messages?.match || defaultMessages.match.replace('{match}', match);
+        } else if (!required && isEmpty(value)) {
           results.status = true;
           if (name in errorsList) {
             delete errorsList[name];
           }
         } else if (
-          (field.regex || defaultRegex?.[field?.name]) &&
-          !new RegExp(field.regex || defaultRegex?.[field?.name]).test(value)
+          (regex || defaultRegex?.[field?.name]) &&
+          !new RegExp(regex || defaultRegex?.[field?.name]).test(value)
         ) {
           errorsList[name] =
-            field.messages?.regex || messages.regex.replace('{field}', name);
-        } else if (field.minLength && !(value.length >= field.minLength)) {
+            messages?.regex || defaultMessages.regex.replace('{field}', name);
+        } else if (minLength && !(value.length >= minLength)) {
           errorsList[name] =
-            field.messages?.minLength ||
-            messages.minLength
-              .replace('{min}', field.minLength.toString())
+            messages?.minLength ||
+            defaultMessages.minLength
+              .replace('{min}', minLength.toString())
               .replace('{field}', name);
-        } else if (field.maxLength && !(value.length <= field.maxLength)) {
+        } else if (maxLength && !(value.length <= maxLength)) {
           errorsList[name] =
-            field.messages?.maxLength ||
-            messages.maxLength
-              .replace('{max}', field.maxLength.toString())
+            messages?.maxLength ||
+            defaultMessages.maxLength
+              .replace('{max}', maxLength.toString())
               .replace('{field}', name);
-        } else if (field.min && !(Number(value) >= field.min)) {
+        } else if (min && !(Number(value) >= min)) {
           errorsList[name] =
-            field.messages?.min ||
-            messages.min
-              .replace('{min}', field.min.toString())
+            messages?.min ||
+            defaultMessages.min
+              .replace('{min}', min.toString())
               .replace('{field}', name);
-        } else if (field.max && !(Number(value) <= field.max)) {
+        } else if (max && !(Number(value) <= max)) {
           errorsList[name] =
-            field.messages?.max ||
-            messages.max
-              .replace('{max}', field.max.toString())
+            messages?.max ||
+            defaultMessages.max
+              .replace('{max}', max.toString())
               .replace('{field}', name);
-        } else if (
-          field.match &&
-          data?.[field.match] &&
-          value !== data?.[field.match]
-        ) {
+        } else if (match && data?.[match] && value !== data?.[match]) {
           errorsList[name] =
-            field.messages?.match ||
-            messages.match.replace('{match}', field.match);
+            messages?.match || defaultMessages.match.replace('{match}', match);
         } else {
           results.status = true;
           if (name in errorsList) {
@@ -221,8 +225,21 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
   };
 
   useEffect(() => {
-    setData(RefEvent());
-  }, [refForm]);
+    if (refForm?.current) {
+      //console.log('relod', 'useEffect');
+      setData(RefEvent());
+    }
+  }, [refForm?.current]);
+
+  useEffect(() => {
+    if (refForm.current) {
+      const observer = new MutationObserver(() => {
+        //console.log('relod', 'observer');
+        setData(RefEvent());
+      });
+      observer.observe(refForm.current, { childList: true, subtree: true });
+    }
+  }, []);
 
   return {
     errors,
