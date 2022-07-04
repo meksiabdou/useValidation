@@ -4,7 +4,8 @@ import { isEmpty } from './utils/utils';
 export interface ValidationInputType {
   name: string;
   type?: string;
-  defaultValue?: string;
+  defaultValue?: any;
+  //value?: any;
   // placeholder?: string;
   regex?: RegExp;
   min?: number;
@@ -31,13 +32,13 @@ const defaultMessages = {
   minLength: '{field} should be more than {min} characters',
   maxLength: '{field} must be less than or equal to {max} characters',
   match: 'Be sure to match the {match}',
-  required: 'the {field} is required'
+  required: 'the {field} is required',
 };
 
-const defaultRegex = {
+const defaultRegex: { email: any; phone: any; url: any } = {
   email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
   phone: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im,
-  url: /(\b(https?):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/i
+  url: /(\b(https?):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/i,
 };
 
 const useValidation = (inputs: Array<ValidationInputType>) => {
@@ -46,11 +47,11 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
   const refForm = useRef<HTMLFormElement>(null);
 
   const validation = ({ name, value }: { name: string; value: string }) => {
-    const errorsList = {};
+    const errorsList: any = {};
     const results = { status: false, errors: errorsList };
     try {
       const [field] = inputs.filter(
-        (item) => item.name.toLowerCase() === name?.toLowerCase()
+        item => item.name.toLowerCase() === name?.toLowerCase()
       );
       if (field) {
         const {
@@ -61,7 +62,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           maxLength,
           minLength,
           messages,
-          regex
+          regex,
         } = field;
         if (required && isEmpty(value)) {
           results.status = false;
@@ -83,8 +84,8 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
             delete errorsList[name];
           }
         } else if (
-          (regex || defaultRegex?.[field?.name]) &&
-          !new RegExp(regex || defaultRegex?.[field?.name]).test(value)
+          (regex || (defaultRegex as any)?.[field?.name]) &&
+          !new RegExp(regex || (defaultRegex as any)?.[field?.name]).test(value)
         ) {
           results.status = false;
           errorsList[name] =
@@ -145,18 +146,18 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
       event.preventDefault();
       const target = event.target as HTMLFormElement;
       const elements: any = [
-        ...(target.querySelectorAll('input') as any),
-        ...(target.querySelectorAll('textarea') as any),
-        ...(target.querySelectorAll('select') as any)
+        ...Array.from(target.querySelectorAll('input')),
+        ...Array.from(target.querySelectorAll('textarea')),
+        ...Array.from(target.querySelectorAll('select')),
       ];
 
       let i = 0;
-      let results = [];
-      const _errors = {};
+      let results: Array<any> = [];
+      const _errors: any = {};
 
       for (const element in elements) {
         const { value, name } = elements[element] as HTMLInputElement;
-        if (name && inputs.map((item) => item.name).includes(name)) {
+        if (name && inputs.map(item => item.name).includes(name)) {
           results[i] = validation({ name, value });
           if (results[i]['errors'][name]) {
             _errors[name] = results[i]['errors'][name];
@@ -164,9 +165,13 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           i = i + 1;
         }
       }
+
       setErrors({ ...errors, ..._errors });
       return onSubmit(
-        !(results.length === 0 || results.map((item) => item.status).includes(false)),
+        !(
+          results.length === 0 ||
+          results.map(item => item.status).includes(false)
+        ),
         event
       );
     } catch (error) {
@@ -187,12 +192,12 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
 
       setErrors({
         ...errors,
-        [name]: results.errors[name]
+        [name]: results.errors[name],
       });
 
       setData({
         ...data,
-        [name]: value
+        [name]: value,
       });
     } catch (error) {
       console.error(error);
@@ -201,28 +206,28 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
 
   const RefEvent = () => {
     const ref = refForm.current;
-    const dataInput = {};
+    const dataInput: any = {};
 
     if (ref && ref !== null) {
       const inputs = ref.getElementsByTagName('input');
       const selects = ref.getElementsByTagName('select');
       const textarea = ref.getElementsByTagName('textarea');
 
-      Object.keys(inputs).map((key) => {
+      Object.keys(inputs).map((key: any) => {
         if (inputs[key].name) {
           dataInput[inputs[key].name] = inputs[key].value?.trim();
         }
         return true;
       });
 
-      Object.keys(textarea).map((key) => {
+      Object.keys(textarea).map((key: any) => {
         if (textarea[key].name) {
           dataInput[textarea[key].name] = textarea[key].value;
         }
         return true;
       });
 
-      Object.keys(selects).map((key) => {
+      Object.keys(selects).map((key: any) => {
         if (selects[key].name) {
           dataInput[selects[key].name] = selects[key].value?.trim();
         }
@@ -234,7 +239,6 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
 
   useEffect(() => {
     if (refForm?.current) {
-      //console.log('relod', 'useEffect');
       setData(RefEvent());
     }
   }, [refForm?.current]);
@@ -242,7 +246,6 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
   useEffect(() => {
     if (refForm.current) {
       const observer = new MutationObserver(() => {
-        //console.log('relod', 'observer');
         setData(RefEvent());
       });
       observer.observe(refForm.current, { childList: true, subtree: true });
@@ -257,7 +260,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
     handelOnChange,
     setData,
     RefEvent,
-    data
+    data,
   };
 };
 
