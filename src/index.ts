@@ -166,7 +166,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
       }
       setErrors({ ...errors, ..._errors });
       return onSubmit(
-        !results.map((item) => item.status).includes(false),
+        !(results.length === 0 || results.map((item) => item.status).includes(false)),
         event
       );
     } catch (error) {
