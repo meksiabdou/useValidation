@@ -64,6 +64,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           regex
         } = field;
         if (required && isEmpty(value)) {
+          results.status = false;
           errorsList[name] =
             messages?.required ||
             defaultMessages.required.replace('{field}', name);
@@ -73,6 +74,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           data?.[match] &&
           value !== data?.[match]
         ) {
+          results.status = false;
           errorsList[name] =
             messages?.match || defaultMessages.match.replace('{match}', match);
         } else if (!required && isEmpty(value)) {
@@ -84,33 +86,39 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           (regex || defaultRegex?.[field?.name]) &&
           !new RegExp(regex || defaultRegex?.[field?.name]).test(value)
         ) {
+          results.status = false;
           errorsList[name] =
             messages?.regex || defaultMessages.regex.replace('{field}', name);
         } else if (minLength && !(value.length >= minLength)) {
+          results.status = false;
           errorsList[name] =
             messages?.minLength ||
             defaultMessages.minLength
               .replace('{min}', minLength.toString())
               .replace('{field}', name);
         } else if (maxLength && !(value.length <= maxLength)) {
+          results.status = false;
           errorsList[name] =
             messages?.maxLength ||
             defaultMessages.maxLength
               .replace('{max}', maxLength.toString())
               .replace('{field}', name);
         } else if (min && !(Number(value) >= min)) {
+          results.status = false;
           errorsList[name] =
             messages?.min ||
             defaultMessages.min
               .replace('{min}', min.toString())
               .replace('{field}', name);
         } else if (max && !(Number(value) <= max)) {
+          results.status = false;
           errorsList[name] =
             messages?.max ||
             defaultMessages.max
               .replace('{max}', max.toString())
               .replace('{field}', name);
         } else if (match && data?.[match] && value !== data?.[match]) {
+          results.status = false;
           errorsList[name] =
             messages?.match || defaultMessages.match.replace('{match}', match);
         } else {
