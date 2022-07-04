@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import useValidation, { ValidationInputType } from '@meksiabdou/usevalidation';
+import * as React from 'react'
+import useValidation, { ValidationInputType } from '../.';
 
 interface InputProps extends ValidationInputType {
   placeholder?: string;
@@ -15,20 +15,20 @@ const App = () => {
       required: true,
       //regex: '',
       messages: {
-        required: 'the field is required'
-      }
+        required: 'the field is required',
+      },
     },
     {
       name: 'email',
       type: 'text',
       placeholder: 'email',
-      defaultValue: 'mohamed@example.com',
+      defaultValue: '',
       regex: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
       required: true,
       messages: {
         required: '',
-        regex: 'the field is invalid'
-      }
+        regex: 'the field is invalid',
+      },
     },
     {
       name: 'phone',
@@ -39,8 +39,8 @@ const App = () => {
       required: true,
       messages: {
         required: '',
-        regex: ''
-      }
+        regex: '',
+      },
     },
     {
       name: 'password',
@@ -57,8 +57,8 @@ const App = () => {
         min: '',
         max: '',
         minLength: '',
-        maxLength: ''
-      }
+        maxLength: '',
+      },
     },
     {
       name: 'confirm-password',
@@ -70,8 +70,8 @@ const App = () => {
       match: 'password',
       messages: {
         regex: '',
-        match: ''
-      }
+        match: '',
+      },
     },
     {
       name: 'amount',
@@ -85,8 +85,8 @@ const App = () => {
         regex: '',
         match: '',
         min: '',
-        max: ''
-      }
+        max: '',
+      },
     },
     {
       name: 'message',
@@ -97,15 +97,26 @@ const App = () => {
       messages: {
         required: '',
         regex: '',
-        match: ''
-      }
-    }
+        match: '',
+      },
+    },
   ];
 
-  const [inputs, setInputs] = useState<Array<InputProps>>(_inputs);
+  const [inputs, setInputs] = React.useState<Array<InputProps>>(_inputs);
 
-  const { errors, handelOnSubmit, refForm, handelOnChange, data } =
-    useValidation(inputs);
+  const {
+    errors,
+    handelOnSubmit,
+    refForm,
+    handelOnChange,
+    data,
+  } = useValidation(inputs);
+
+  /*const errors: any = {};
+  const handelOnSubmit = (s: any, e: any) => null;
+  const refForm = React.useRef<any>(null)
+  const data: any = {};
+  const handelOnChange = (e: any) => null;*/
 
   const addNewInput = () => {
     const name = 'input-' + Number((Math.random() * 1000).toFixed(0));
@@ -114,11 +125,11 @@ const App = () => {
       {
         name: name,
         type: 'text',
-        defaultValue: Math.random() * 100,
+        defaultValue: "",
         placeholder: name,
         required: true,
-        regex: /^[\d.]+$/m
-      }
+        regex: /^[\d.]+$/m,
+      },
     ]);
   };
 
@@ -132,23 +143,23 @@ const App = () => {
         margin: '50px auto',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
       }}
     >
-      <form onSubmit={(event) => handelOnSubmit(event, onSubmit)} ref={refForm}>
-        <div className='title'>
+      <form onSubmit={event => handelOnSubmit(event, onSubmit)} ref={refForm}>
+        <div className="title">
           <h4>{'Form'}</h4>
         </div>
 
         {inputs.map((item, index) => {
           return (
             <div
-              className='form-group'
+              className="form-group"
               style={{ marginBottom: 10 }}
               key={index.toString()}
             >
               <p
-                className='error form-text'
+                className="error form-text"
                 style={{ color: '#ff0000', marginBottom: 5 }}
               >
                 {errors[item.name] && errors[item.name]}
@@ -181,14 +192,14 @@ const App = () => {
           );
         })}
         <br />
-        <button type='submit' className='btn btn-default btn-submit'>
+        <button type="submit" className="btn btn-default btn-submit">
           login
         </button>
         <br />
         <br />
         <button
-          type='button'
-          className='btn btn-default btn-submit'
+          type="button"
+          className="btn btn-default btn-submit"
           onClick={addNewInput}
         >
           Add new input
