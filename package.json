@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "3.0.1",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -47,15 +47,15 @@
     }
   ],
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^7.0.8",
-    "@types/react": "^18.0.14",
-    "@types/react-dom": "^18.0.5",
-    "husky": "^8.0.1",
+    "@size-limit/preset-small-lib": "^8.1.0",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.10",
+    "husky": "^8.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "size-limit": "^7.0.8",
+    "size-limit": "^8.1.0",
     "tsdx": "^0.14.1",
-    "tslib": "^2.4.0",
-    "typescript": "^4.7.4"
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.4"
   }
 }

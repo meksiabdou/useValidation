@@ -1,8 +1,9 @@
-import * as React from 'react'
+import * as React from 'react';
 import useValidation, { ValidationInputType } from '../.';
 
 interface InputProps extends ValidationInputType {
   placeholder?: string;
+  as?: 'textarea' | 'input'
 }
 
 const App = () => {
@@ -11,7 +12,7 @@ const App = () => {
       name: 'name',
       type: 'text',
       defaultValue: 'Mohamed',
-      placeholder: 'name',
+      placeholder: 'Full Name',
       required: true,
       //regex: '',
       messages: {
@@ -21,7 +22,7 @@ const App = () => {
     {
       name: 'email',
       type: 'text',
-      placeholder: 'email',
+      placeholder: 'E-mail',
       defaultValue: '',
       regex: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
       required: true,
@@ -33,7 +34,7 @@ const App = () => {
     {
       name: 'phone',
       type: 'text',
-      placeholder: 'phone',
+      placeholder: 'Phone',
       defaultValue: '0552000000',
       regex: /^[0]{1}[5-7]{1}[0-9]{8}$/m,
       required: true,
@@ -46,7 +47,7 @@ const App = () => {
       name: 'password',
       type: 'password',
       defaultValue: '',
-      placeholder: 'password',
+      placeholder: 'Password',
       required: true,
       //regex: '',
       minLength: 8,
@@ -74,10 +75,11 @@ const App = () => {
       },
     },
     {
-      name: 'amount',
+      name: 'buying_price',
       type: 'text',
       defaultValue: '',
-      placeholder: 'amount',
+      required: true,
+      placeholder: 'Buying price',
       //regex: '',
       min: 8,
       max: 20,
@@ -89,10 +91,82 @@ const App = () => {
       },
     },
     {
-      name: 'message',
-      type: 'textarea',
+      name: 'selling_price',
+      type: 'text',
       defaultValue: '',
-      placeholder: 'message',
+      required: true,
+      placeholder: 'Selling price',
+      $gte: 'buying_price',
+      min: 8,
+      max: 20,
+      messages: {
+        regex: '',
+        match: '',
+        min: '',
+        max: '',
+      },
+    },
+    {
+      name: 'start_date',
+      type: 'date',
+      defaultValue: '',
+      placeholder: 'Start Date',
+      required: true,
+      //regex: '',
+      messages: {
+        regex: '',
+        match: '',
+        min: '',
+        max: '',
+      },
+    },
+    {
+      name: 'end_date',
+      type: 'date',
+      defaultValue: '',
+      placeholder: 'End Date',
+      required: true,
+      $lt: 'start_date',
+      //regex: '',
+      messages: {
+        regex: '',
+        match: '',
+        min: '',
+        max: '',
+      },
+    },
+    {
+      name: 'start_time',
+      type: 'time',
+      defaultValue: '',
+      placeholder: 'Start Time',
+      //regex: '',
+      messages: {
+        regex: '',
+        match: '',
+        min: '',
+        max: '',
+      },
+    },
+    {
+      name: 'end_time',
+      type: 'time',
+      defaultValue: '',
+      placeholder: 'End Time',
+      $gte: 'start_time',
+      //regex: '',
+      messages: {
+        regex: '',
+        match: '',
+        min: '',
+        max: '',
+      },
+    },
+    {
+      name: 'message',
+      as: 'textarea',
+      defaultValue: '',
+      placeholder: 'Message',
       //regex: '',
       messages: {
         required: '',
@@ -119,13 +193,13 @@ const App = () => {
   const handelOnChange = (e: any) => null;*/
 
   const addNewInput = () => {
-    const name = 'input-' + Number((Math.random() * 1000).toFixed(0));
+    const name = 'input_' + Number((Math.random() * 1000).toFixed(0));
     setInputs([
       ...inputs,
       {
         name: name,
         type: 'text',
-        defaultValue: "",
+        defaultValue: '',
         placeholder: name,
         required: true,
         regex: /^[\d.]+$/m,
@@ -158,14 +232,9 @@ const App = () => {
               style={{ marginBottom: 10 }}
               key={index.toString()}
             >
-              <p
-                className="error form-text"
-                style={{ color: '#ff0000', marginBottom: 5 }}
-              >
-                {errors[item.name] && errors[item.name]}
-              </p>
+              <p className="form-text">{item.placeholder}</p>
               <div className={`input-group`}>
-                {item.type === 'textarea' ? (
+                {item.as === 'textarea' ? (
                   <textarea
                     name={item.name}
                     defaultValue={item.defaultValue}
@@ -188,6 +257,12 @@ const App = () => {
                   />
                 )}
               </div>
+              <p
+                className="error form-text"
+                style={{ color: '#ff0000', marginBottom: 5, marginTop: 10 }}
+              >
+                {errors[item.name] && errors[item.name]}
+              </p>
             </div>
           );
         })}
