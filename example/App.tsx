@@ -96,7 +96,7 @@ const App = () => {
       defaultValue: '',
       required: true,
       placeholder: 'Selling price',
-      $gte: 'buying_price',
+      gte: 'buying_price',
       min: 8,
       max: 20,
       messages: {
@@ -112,6 +112,7 @@ const App = () => {
       defaultValue: '',
       placeholder: 'Start Date',
       required: true,
+      lt: 'end_date',
       //regex: '',
       messages: {
         regex: '',
@@ -126,7 +127,7 @@ const App = () => {
       defaultValue: '',
       placeholder: 'End Date',
       required: true,
-      $lt: 'start_date',
+      gt: 'start_date',
       //regex: '',
       messages: {
         regex: '',
@@ -153,7 +154,7 @@ const App = () => {
       type: 'time',
       defaultValue: '',
       placeholder: 'End Time',
-      $gte: 'start_time',
+      gte: 'start_time',
       //regex: '',
       messages: {
         regex: '',
@@ -208,9 +209,13 @@ const App = () => {
   };
 
   const onSubmit = (status: boolean) => {
-    console.log(status, data, errors);
+    if (status) {
+      console.log(status, data);
+    } else {
+      console.log(status, errors);
+    }
   };
-
+  
   return (
     <div
       style={{

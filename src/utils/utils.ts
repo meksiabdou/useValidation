@@ -1,6 +1,6 @@
 /**
  * @method isEmpty
- * @param {String | Number | Object} value
+ * @param {any} value
  * @returns {Boolean} true & false
  * @description this value is Empty Check
  */
@@ -22,7 +22,19 @@ export const isEmpty = (value: any): boolean => {
   }
 };
 
-export const stringToNumbre = ({ value, type }: { value: any; type?: any }) => {
+/**
+ * @method stringToNumbre
+ * @param {{value: any, type: any}}
+ * @returns {number | undefined} true & false
+ * @description stringToNumbre convert time & date to number
+ */
+export const stringToNumbre = ({
+  value,
+  type,
+}: {
+  value: any;
+  type?: any;
+}): number | undefined => {
   try {
     if (['datetime-local', 'date', 'time'].includes(type?.toLowerCase())) {
       if (type === 'time') {
@@ -36,6 +48,7 @@ export const stringToNumbre = ({ value, type }: { value: any; type?: any }) => {
     }
     return undefined;
   } catch (error) {
+    //console.log(error);
     return undefined;
   }
 };

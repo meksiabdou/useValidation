@@ -1,8 +1,7 @@
-/* eslint-disable no-unused-vars */
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, FormEvent } from 'react';
 import { isEmpty, stringToNumbre } from './utils/utils';
 
-export type ValidationParams =
+type ValidationParams =
   | 'regex'
   | 'min'
   | 'max'
@@ -11,13 +10,12 @@ export type ValidationParams =
   | 'match'
   | 'required';
 
-export type ValidationOperators =
-  | '$ne'
-  | '$eq'
-  | '$gt'
-  | '$gte'
-  | '$lte'
-  | '$lt';
+type ValidationOperators = 'ne' | 'eq' | 'gt' | 'gte' | 'lte' | 'lt';
+
+export type MessagesType = Record<
+  ValidationParams | ValidationOperators,
+  string
+>;
 
 export interface ValidationInputType {
   name: string;
@@ -32,12 +30,12 @@ export interface ValidationInputType {
   maxLength?: number;
   required?: boolean;
   match?: string;
-  $eq?: string;
-  $ne?: string;
-  $gt?: string;
-  $gte?: string;
-  $lt?: string;
-  $lte?: string;
+  eq?: string;
+  ne?: string;
+  gt?: string;
+  gte?: string;
+  lt?: string;
+  lte?: string;
   messages?: {
     regex?: string;
     min?: string;
@@ -46,19 +44,16 @@ export interface ValidationInputType {
     required?: string;
     minLength?: string;
     maxLength?: string;
-    $eq?: string;
-    $ne?: string;
-    $gt?: string;
-    $gte?: string;
-    $lt?: string;
-    $lte?: string;
+    eq?: string;
+    ne?: string;
+    gt?: string;
+    gte?: string;
+    lt?: string;
+    lte?: string;
   };
 }
 
-const defaultMessages: Record<
-  ValidationParams | ValidationOperators,
-  string
-> = {
+const defaultMessages: MessagesType = {
   regex: 'the {field} is invalid',
   min: '{field} should be more or equal than {min}',
   max: '{field} must be less than or equal to {max}',
@@ -66,12 +61,12 @@ const defaultMessages: Record<
   maxLength: '{field} must be less than or equal to {max} characters',
   match: 'Be sure to match the {match}',
   required: 'the {field} is required',
-  $eq: 'Be sure to equal than {field}',
-  $ne: 'Be sure to not equal to {field}',
-  $gt: 'Be sure to greater than {field}',
-  $gte: 'Be sure to greater than or equal to {field}',
-  $lt: 'Be sure to less than {field}',
-  $lte: 'Be sure to less than or equal to {field}',
+  eq: 'Be sure to equal than {field}',
+  ne: 'Be sure to not equal to {field}',
+  gt: 'Be sure to greater than {field}',
+  gte: 'Be sure to greater than or equal to {field}',
+  lt: 'Be sure to less than {field}',
+  lte: 'Be sure to less than or equal to {field}',
 };
 
 const defaultRegex: { email: any; phone: any; url: any } = {
@@ -110,15 +105,18 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           minLength,
           messages,
           regex,
-          $eq,
-          $ne,
-          $gt,
-          $gte,
-          $lt,
-          $lte,
+          eq,
+          ne,
+          gt,
+          gte,
+          lt,
+          lte,
         } = field;
 
-        const getMessage = (key: ValidationParams | ValidationOperators, _field = name) => {
+        const getMessage = (
+          key: ValidationParams | ValidationOperators,
+          _field = name
+        ) => {
           return (
             messages?.[key] || defaultMessages?.[key].replace('{field}', _field)
           );
@@ -148,10 +146,16 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           errorsList[name] = getMessage('regex');
         } else if (minLength && !(value.length >= minLength)) {
           results.status = false;
-          errorsList[name] = getMessage('minLength').replace('{min}', minLength.toString());
+          errorsList[name] = getMessage('minLength').replace(
+            '{min}',
+            minLength.toString()
+          );
         } else if (maxLength && !(value.length <= maxLength)) {
           results.status = false;
-          errorsList[name] = getMessage('maxLength').replace('{max}', maxLength.toString());
+          errorsList[name] = getMessage('maxLength').replace(
+            '{max}',
+            maxLength.toString()
+          );
         } else if (min && !(Number(value) >= min)) {
           results.status = false;
           errorsList[name] = getMessage('min').replace('{min}', min.toString());
@@ -160,34 +164,43 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           errorsList[name] = getMessage('max').replace('{max}', max.toString());
         } else if (match && data?.[match] && value !== data?.[match]) {
           results.status = false;
-          errorsList[name] = getMessage('match').replace('{match}', match.toString());
+          errorsList[name] = getMessage('match').replace(
+            '{match}',
+            match.toString()
+          );
         } else if (!isEmpty(stringToNumbre({ value, type }))) {
           const numbre: any = stringToNumbre({ value, type });
-          const getNumbre = (key: any) => stringToNumbre({ value: data?.[key], type }) as any
-          if ($eq && !isEmpty(data?.[$eq]) && numbre !== getNumbre($eq)) {
+          const getNumbre = (key: any) =>
+            stringToNumbre({ value: data?.[key], type }) as any;
+          if (eq && !isEmpty(data?.[eq]) && numbre !== getNumbre(eq)) {
             results.status = false;
-            errorsList[name] = getMessage('$eq', $eq);
-          } else if ($ne && !isEmpty(data?.[$ne]) && numbre === getNumbre($ne)) {
+            errorsList[name] = getMessage('eq', eq);
+          } else if (ne && !isEmpty(data?.[ne]) && numbre === getNumbre(ne)) {
             results.status = false;
-            errorsList[name] = getMessage('$ne', $ne);
-          }else if ($gt && !isEmpty(data?.[$gt]) && numbre <= getNumbre($gt)) {
+            errorsList[name] = getMessage('ne', ne);
+          } else if (gt && !isEmpty(data?.[gt]) && numbre <= getNumbre(gt)) {
             results.status = false;
-            errorsList[name] = getMessage('$gt', $gt);
-          } else if ($gte && !isEmpty(data?.[$gte]) && numbre < getNumbre($gte)) {
+            errorsList[name] = getMessage('gt', gt);
+          } else if (gte && !isEmpty(data?.[gte]) && numbre < getNumbre(gte)) {
             results.status = false;
-            errorsList[name] = getMessage('$gte', $gte);
-          } else if ($lt && !isEmpty(data?.[$lt]) && numbre >= getNumbre($lt)) {
+            errorsList[name] = getMessage('gte', gte);
+          } else if (lt && !isEmpty(data?.[lt]) && numbre >= getNumbre(lt)) {
             results.status = false;
-            errorsList[name] = getMessage('$lt', $lt);
-          } else if ($lte && !isEmpty(data?.[$lte]) && numbre > getNumbre($lte)) {
+            errorsList[name] = getMessage('lt', lt);
+          } else if (lte && !isEmpty(data?.[lte]) && numbre > getNumbre(lte)) {
             results.status = false;
-            errorsList[name] = getMessage('$lte', $lt);
+            errorsList[name] = getMessage('lte', lt);
+          } else {
+            results.status = true;
+            const [compareName] = [eq, ne, gt, gte, lt, lte].filter((i) => i);
+            if(compareName) {
+              errorsList[compareName] = undefined;
+            }
+            errorsList[name] = undefined;
           }
         } else {
           results.status = true;
-          if (name in errorsList) {
-            delete errorsList[name];
-          }
+          errorsList[name] = undefined;
         }
       }
       results.errors = errorsList;
@@ -200,41 +213,35 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
   };
 
   const handelOnSubmit = (
-    event: React.FormEvent,
-    onSubmit: (status: boolean, e: React.FormEvent) => void
+    event: FormEvent,
+    onSubmit: (status: boolean, event: FormEvent) => void
   ) => {
     try {
       event.preventDefault();
       const target = event.target as HTMLFormElement;
-      const elements: any = [
+      const elements: Array<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      > = [
         ...Array.from(target.querySelectorAll('input')),
         ...Array.from(target.querySelectorAll('textarea')),
         ...Array.from(target.querySelectorAll('select')),
       ];
+      const results: Array<{ status: boolean; errors: Record<any, any> }> = [];
+      const status: Array<boolean> = [];
+      const resultsErrors: any = {};
+      const names = inputs.map(item => item.name);
 
-      let i = 0;
-      let results: Array<any> = [];
-      const _errors: any = {};
-
-      for (const element in elements) {
-        const { value, name, type } = elements[element] as HTMLInputElement;
-        if (name && inputs.map(item => item.name).includes(name)) {
-          results[i] = validation({ name, value, type });
-          if (results[i]['errors'][name]) {
-            _errors[name] = results[i]['errors'][name];
-          }
-          i = i + 1;
+      elements.map((element, index) => {
+        const { value, name, type } = element;
+        if (name && names.includes(name)) {
+          results[index] = validation({ name, value, type });
+          resultsErrors[name] = results?.[index]?.['errors']?.[name];
+          status[index] = results[index].status;
         }
-      }
+      });
 
-      setErrors({ ...errors, ..._errors });
-      return onSubmit(
-        !(
-          results.length === 0 ||
-          results.map(item => item.status).includes(false)
-        ),
-        event
-      );
+      setErrors({ ...errors, ...resultsErrors });
+      return onSubmit(!(results.length === 0 || status.includes(false)), event);
     } catch (error) {
       console.error(error);
     }
@@ -247,14 +254,15 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
   ) => {
     try {
       const name = event?.target?.name;
-      const value = event?.target?.value?.trim();
+      const value = event?.target?.value?.trim?.();
       const type = event?.target?.type;
 
       const results = validation({ name, value, type });
 
       setErrors({
         ...errors,
-        [name]: results.errors[name],
+        ...results.errors,
+        //[name]: results.errors[name],
       });
 
       setData({
@@ -277,7 +285,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
 
       Object.keys(inputs).map((key: any) => {
         if (inputs[key].name) {
-          dataInput[inputs[key].name] = inputs[key].value?.trim();
+          dataInput[inputs[key].name] = inputs[key].value?.trim?.();
         }
         return true;
       });
@@ -291,7 +299,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
 
       Object.keys(selects).map((key: any) => {
         if (selects[key].name) {
-          dataInput[selects[key].name] = selects[key].value?.trim();
+          dataInput[selects[key].name] = selects[key].value?.trim?.();
         }
         return true;
       });
@@ -303,6 +311,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
     if (refForm?.current) {
       setData(RefEvent());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refForm?.current]);
 
   useEffect(() => {
