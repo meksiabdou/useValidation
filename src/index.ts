@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, FormEvent } from 'react';
 import { isEmpty, stringToNumbre } from './utils/utils';
 
 type ValidationParams =
-  | 'regex'
+  | 'regExp'
   | 'min'
   | 'max'
   | 'minLength'
@@ -23,7 +23,8 @@ export interface ValidationInputType {
   defaultValue?: any;
   //value?: any;
   // placeholder?: string;
-  regex?: RegExp;
+  //regex?: RegExp;
+  regExp?: RegExp;
   min?: number;
   max?: number;
   minLength?: number;
@@ -37,7 +38,8 @@ export interface ValidationInputType {
   lt?: string;
   lte?: string;
   messages?: {
-    regex?: string;
+    //regex?: string;
+    regExp?: string;
     min?: string;
     max?: string;
     match?: string;
@@ -54,7 +56,7 @@ export interface ValidationInputType {
 }
 
 const defaultMessages: MessagesType = {
-  regex: 'the {field} is invalid',
+  regExp: 'the {field} is invalid',
   min: '{field} should be more or equal than {min}',
   max: '{field} must be less than or equal to {max}',
   minLength: '{field} should be more than {min} characters',
@@ -104,7 +106,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           maxLength,
           minLength,
           messages,
-          regex,
+          // regex,
           eq,
           ne,
           gt,
@@ -113,12 +115,14 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           lte,
         } = field;
 
+        const regExp = field?.regExp || (field as any)?.regex;
+
         const getMessage = (
           key: ValidationParams | ValidationOperators,
           _field = name
         ) => {
           return (
-            messages?.[key] || defaultMessages?.[key].replace('{field}', _field)
+            messages?.[key] || defaultMessages?.[key]?.replace?.('{field}', _field)
           );
         };
 
@@ -139,29 +143,29 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
             delete errorsList[name];
           }
         } else if (
-          (regex || (defaultRegex as any)?.[field?.name]) &&
-          !new RegExp(regex || (defaultRegex as any)?.[field?.name]).test(value)
+          (regExp || (defaultRegex as any)?.[field?.name]) &&
+          !new RegExp(regExp || (defaultRegex as any)?.[field?.name]).test(value)
         ) {
           results.status = false;
-          errorsList[name] = getMessage('regex');
-        } else if (minLength && !(value.length >= minLength)) {
+          errorsList[name] = getMessage('regExp');
+        } else if (!isEmpty(minLength) && !(value.length >= Math.abs(minLength as any))) {
           results.status = false;
           errorsList[name] = getMessage('minLength').replace(
             '{min}',
-            minLength.toString()
+            Math.abs(minLength as any).toString()
           );
-        } else if (maxLength && !(value.length <= maxLength)) {
+        } else if (!isEmpty(maxLength) && !(value.length <= Math.abs(maxLength as any))) {
           results.status = false;
           errorsList[name] = getMessage('maxLength').replace(
             '{max}',
-            maxLength.toString()
+            Math.abs(maxLength as any).toString()
           );
-        } else if (min && !(Number(value) >= min)) {
+        } else if (!isEmpty(min) && !(Number(value) >= (min as any))) {
           results.status = false;
-          errorsList[name] = getMessage('min').replace('{min}', min.toString());
-        } else if (max && !(Number(value) <= max)) {
+          errorsList[name] = getMessage('min').replace('{min}', (min as any).toString());
+        } else if (!isEmpty(max) && !(Number(value) <= (max as any))) {
           results.status = false;
-          errorsList[name] = getMessage('max').replace('{max}', max.toString());
+          errorsList[name] = getMessage('max').replace('{max}', (max as any).toString());
         } else if (match && data?.[match] && value !== data?.[match]) {
           results.status = false;
           errorsList[name] = getMessage('match').replace(
