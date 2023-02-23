@@ -3,11 +3,31 @@ import useValidation, { ValidationInputType } from '../.';
 
 interface InputProps extends ValidationInputType {
   placeholder?: string;
-  as?: 'textarea' | 'input'
+  as?: 'textarea' | 'input';
 }
 
 const App = () => {
-  const _inputs: Array<InputProps> = [
+  const [inputIndex, setInputIndex] = React.useState(0);
+
+  const defaultDateInputs = [
+    {
+      name: 'localdate[0]',
+      index: 0,
+      required: true,
+      label: 'date',
+      placeholder: 'date',
+      parentClassName: 'col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-sm-12',
+      type: 'date',
+      messages: {
+        required: 'the field is required',
+      },
+    },
+  ];
+
+  const [dateInputs, setDateInputs] = React.useState(defaultDateInputs);
+
+  const inputs: Array<InputProps> = [
+    ...dateInputs,
     {
       name: 'name',
       type: 'text',
@@ -177,7 +197,7 @@ const App = () => {
     },
   ];
 
-  const [inputs, setInputs] = React.useState<Array<InputProps>>(_inputs);
+  //const [inputs, setInputs] = React.useState<Array<InputProps>>(_inputs);
 
   const {
     errors,
@@ -187,35 +207,39 @@ const App = () => {
     data,
   } = useValidation(inputs);
 
-  /*const errors: any = {};
-  const handelOnSubmit = (s: any, e: any) => null;
-  const refForm = React.useRef<any>(null)
-  const data: any = {};
-  const handelOnChange = (e: any) => null;*/
-
-  const addNewInput = () => {
-    const name = 'input_' + Number((Math.random() * 1000).toFixed(0));
-    setInputs([
-      ...inputs,
-      {
-        name: name,
-        type: 'text',
-        defaultValue: '',
-        placeholder: name,
-        required: true,
-        regex: /^[\d.]+$/m,
-      },
+  const addItem = () => {
+    const lastIndex = inputIndex + 1;
+    setInputIndex(lastIndex);
+    setDateInputs([
+      ...dateInputs,
+      ...defaultDateInputs.map(item => {
+        return {
+          ...item,
+          name: item.name.replace('[0]', `[${lastIndex}]`),
+          index: lastIndex,
+          required: false,
+        };
+      }),
     ]);
   };
 
-  const onSubmit = (status: boolean) => {
-    if (status) {
-      console.log(status, data);
-    } else {
-      console.log(status, errors);
+  const removeItem = (currentIndex?: number) => {
+    if (currentIndex) {
+      setDateInputs([
+        ...dateInputs.filter((item: any) => item?.index !== currentIndex),
+      ]);
     }
   };
-  
+
+  const onSubmit = (status: boolean) => {
+    console.log(status, data);
+    if (status) {
+      //console.log(status, data);
+    } else {
+      //console.log(status, errors);
+    }
+  };
+
   return (
     <div
       style={{
@@ -237,6 +261,16 @@ const App = () => {
               style={{ marginBottom: 10 }}
               key={index.toString()}
             >
+              {' '}
+              {item.name === 'name' ? (
+                <button
+                  type="button"
+                  className="btn btn-default btn-submit"
+                  onClick={addItem}
+                >
+                  Add new input
+                </button>
+              ) : null}
               <p className="form-text">{item.placeholder}</p>
               <div className={`input-group`}>
                 {item.as === 'textarea' ? (
@@ -246,6 +280,7 @@ const App = () => {
                     className={`form-control`}
                     onChange={handelOnChange}
                     placeholder={item.placeholder}
+                    value={data[item.name]}
                     //required={item.required}
                     style={{ minHeight: 100, minWidth: 200 }}
                   />
@@ -257,10 +292,20 @@ const App = () => {
                     className={`form-control`}
                     onChange={handelOnChange}
                     placeholder={item.placeholder}
+                    value={data[item.name]}
                     //required={item.required}
                     style={{ minHeight: 35, width: 200 }}
                   />
                 )}
+                {(item.name as string).search(/localdate/g) !== -1 ? (
+                  <button
+                    type="button"
+                    style={{ color: '#ff0000' }}
+                    onClick={() => removeItem((item as any)?.index)}
+                  >
+                    Delete Item
+                  </button>
+                ) : null}
               </div>
               <p
                 className="error form-text"
@@ -277,13 +322,6 @@ const App = () => {
         </button>
         <br />
         <br />
-        <button
-          type="button"
-          className="btn btn-default btn-submit"
-          onClick={addNewInput}
-        >
-          Add new input
-        </button>
       </form>
     </div>
   );

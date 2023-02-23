@@ -104,7 +104,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           maxLength,
           minLength,
           messages,
-          regex,
+          //regex,
           eq,
           ne,
           gt,
@@ -121,6 +121,8 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
             messages?.[key] || defaultMessages?.[key].replace('{field}', _field)
           );
         };
+
+        const regExp = (field as any)?.regExp || (field as any)?.regex;
 
         if (required && isEmpty(value)) {
           results.status = false;
@@ -139,29 +141,41 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
             delete errorsList[name];
           }
         } else if (
-          (regex || (defaultRegex as any)?.[field?.name]) &&
-          !new RegExp(regex || (defaultRegex as any)?.[field?.name]).test(value)
+          (regExp || (defaultRegex as any)?.[field?.name]) &&
+          !new RegExp(regExp || (defaultRegex as any)?.[field?.name]).test(value)
         ) {
           results.status = false;
           errorsList[name] = getMessage('regex');
-        } else if (minLength && !(value.length >= minLength)) {
+        } else if (
+          !isEmpty(minLength) &&
+          !(value.length >= Math.abs(minLength as any))
+        ) {
           results.status = false;
           errorsList[name] = getMessage('minLength').replace(
             '{min}',
-            minLength.toString()
+            Math.abs(minLength as any).toString()
           );
-        } else if (maxLength && !(value.length <= maxLength)) {
+        } else if (
+          !isEmpty(maxLength) &&
+          !(value.length <= Math.abs(maxLength as any))
+        ) {
           results.status = false;
           errorsList[name] = getMessage('maxLength').replace(
             '{max}',
-            maxLength.toString()
+            Math.abs(maxLength as any).toString()
           );
-        } else if (min && !(Number(value) >= min)) {
+        } else if (!isEmpty(min) && !(Number(value) >= (min as any))) {
           results.status = false;
-          errorsList[name] = getMessage('min').replace('{min}', min.toString());
-        } else if (max && !(Number(value) <= max)) {
+          errorsList[name] = getMessage('min').replace(
+            '{min}',
+            (min as any).toString()
+          );
+        } else if (!isEmpty(max) && !(Number(value) <= (max as any))) {
           results.status = false;
-          errorsList[name] = getMessage('max').replace('{max}', max.toString());
+          errorsList[name] = getMessage('max').replace(
+            '{max}',
+            (max as any).toString()
+          );
         } else if (match && data?.[match] && value !== data?.[match]) {
           results.status = false;
           errorsList[name] = getMessage('match').replace(
@@ -192,8 +206,8 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
             errorsList[name] = getMessage('lte', lt);
           } else {
             results.status = true;
-            const [compareName] = [eq, ne, gt, gte, lt, lte].filter((i) => i);
-            if(compareName) {
+            const [compareName] = [eq, ne, gt, gte, lt, lte].filter(i => i);
+            if (compareName) {
               errorsList[compareName] = undefined;
             }
             errorsList[name] = undefined;
@@ -254,7 +268,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
   ) => {
     try {
       const name = event?.target?.name;
-      const value = event?.target?.value?.trim?.();
+      const value = event?.target?.value;
       const type = event?.target?.type;
 
       const results = validation({ name, value, type });
@@ -262,7 +276,6 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
       setErrors({
         ...errors,
         ...results.errors,
-        //[name]: results.errors[name],
       });
 
       setData({
@@ -274,52 +287,37 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
     }
   };
 
-  const RefEvent = () => {
+  const RefEvent = (prevData: Record<any, any>) => {
     const ref = refForm.current;
-    const dataInput: any = {};
-
+    const newData: any = {};
     if (ref && ref !== null) {
-      const inputs = ref.getElementsByTagName('input');
-      const selects = ref.getElementsByTagName('select');
-      const textarea = ref.getElementsByTagName('textarea');
-
-      Object.keys(inputs).map((key: any) => {
-        if (inputs[key].name) {
-          dataInput[inputs[key].name] = inputs[key].value?.trim?.();
-        }
-        return true;
-      });
-
-      Object.keys(textarea).map((key: any) => {
-        if (textarea[key].name) {
-          dataInput[textarea[key].name] = textarea[key].value;
-        }
-        return true;
-      });
-
-      Object.keys(selects).map((key: any) => {
-        if (selects[key].name) {
-          dataInput[selects[key].name] = selects[key].value?.trim?.();
+      const elements: Array<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      > = [
+        ...Array.from(ref.querySelectorAll('input')),
+        ...Array.from(ref.querySelectorAll('textarea')),
+        ...Array.from(ref.querySelectorAll('select')),
+      ];
+      elements.map((element: any) => {
+        const { name } = element;
+        const value = prevData?.[name];
+        if (name && !isEmpty(value)) {
+          newData[name] = value;
         }
         return true;
       });
     }
-    return dataInput;
+    return newData;
   };
-
-  useEffect(() => {
-    if (refForm?.current) {
-      setData(RefEvent());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refForm?.current]);
 
   useEffect(() => {
     if (refForm.current) {
       const observer = new MutationObserver(() => {
-        setData(RefEvent());
+        setData((prev: Record<any, any>) => {
+          return RefEvent(prev);
+        });
       });
-      observer.observe(refForm.current, { childList: true, subtree: true });
+      observer.observe(refForm.current, { childList: true, subtree: false });
     }
   }, []);
 
