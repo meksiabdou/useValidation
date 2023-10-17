@@ -76,11 +76,23 @@ const defaultRegex: { email: any; phone: any; url: any } = {
   phone: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im,
   url: /(\b(https?):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/i,
 };
-
-const useValidation = (inputs: Array<ValidationInputType>) => {
-  const [errors, setErrors] = useState<any>({});
-  const [data, setData] = useState<any>({});
+const useValidation = (
+  inputs: Array<ValidationInputType>,
+  config: { mutationObserverInit?: MutationObserverInit } = {}
+) => {
+  const [errors, setErrors] = useState<Record<any, any>>({});
+  const [data, setData] = useState<Record<any, any>>({});
   const refForm = useRef<HTMLFormElement>(null);
+
+  const getMessage = (
+    key: ValidationParams | ValidationOperators,
+    name: string,
+    messages?: MessagesType
+  ) => {
+    return (
+      messages?.[key] || defaultMessages?.[key]?.replace?.('{field}', name)
+    );
+  };
 
   const validation = ({
     name,
@@ -115,21 +127,18 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           lte,
         } = field;
 
-        const regExp = field?.regExp || (field as any)?.regex;
-
-        const getMessage = (
+        const _getMessage = (
           key: ValidationParams | ValidationOperators,
-          _field = name
+          fieldName: string = name
         ) => {
-          return (
-            messages?.[key] ||
-            defaultMessages?.[key]?.replace?.('{field}', _field)
-          );
+          return getMessage(key, fieldName, messages as any);
         };
+
+        const regExp = field?.regExp || (field as any)?.regex;
 
         if (required && isEmpty(value)) {
           results.status = false;
-          errorsList[name] = getMessage('required');
+          errorsList[name] = _getMessage('required');
         } else if (
           !required &&
           match &&
@@ -137,7 +146,7 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           value !== data?.[match]
         ) {
           results.status = false;
-          errorsList[name] = getMessage('match').replace('{match}', match);
+          errorsList[name] = _getMessage('match').replace('{match}', match);
         } else if (!required && isEmpty(value)) {
           results.status = true;
           if (name in errorsList) {
@@ -150,13 +159,13 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           )
         ) {
           results.status = false;
-          errorsList[name] = getMessage('regExp');
+          errorsList[name] = _getMessage('regExp');
         } else if (
           !isEmpty(minLength) &&
           !(value.length >= Math.abs(minLength as any))
         ) {
           results.status = false;
-          errorsList[name] = getMessage('minLength').replace(
+          errorsList[name] = _getMessage('minLength').replace(
             '{min}',
             Math.abs(minLength as any).toString()
           );
@@ -165,25 +174,25 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           !(value.length <= Math.abs(maxLength as any))
         ) {
           results.status = false;
-          errorsList[name] = getMessage('maxLength').replace(
+          errorsList[name] = _getMessage('maxLength').replace(
             '{max}',
             Math.abs(maxLength as any).toString()
           );
         } else if (!isEmpty(min) && !(Number(value) >= (min as any))) {
           results.status = false;
-          errorsList[name] = getMessage('min').replace(
+          errorsList[name] = _getMessage('min').replace(
             '{min}',
             (min as any).toString()
           );
         } else if (!isEmpty(max) && !(Number(value) <= (max as any))) {
           results.status = false;
-          errorsList[name] = getMessage('max').replace(
+          errorsList[name] = _getMessage('max').replace(
             '{max}',
             (max as any).toString()
           );
         } else if (match && data?.[match] && value !== data?.[match]) {
           results.status = false;
-          errorsList[name] = getMessage('match').replace(
+          errorsList[name] = _getMessage('match').replace(
             '{match}',
             match.toString()
           );
@@ -193,22 +202,22 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
             stringToNumbre({ value: data?.[key], type }) as any;
           if (eq && !isEmpty(data?.[eq]) && numbre !== getNumbre(eq)) {
             results.status = false;
-            errorsList[name] = getMessage('eq', eq);
+            errorsList[name] = _getMessage('eq', eq);
           } else if (ne && !isEmpty(data?.[ne]) && numbre === getNumbre(ne)) {
             results.status = false;
-            errorsList[name] = getMessage('ne', ne);
+            errorsList[name] = _getMessage('ne', ne);
           } else if (gt && !isEmpty(data?.[gt]) && numbre <= getNumbre(gt)) {
             results.status = false;
-            errorsList[name] = getMessage('gt', gt);
+            errorsList[name] = _getMessage('gt', gt);
           } else if (gte && !isEmpty(data?.[gte]) && numbre < getNumbre(gte)) {
             results.status = false;
-            errorsList[name] = getMessage('gte', gte);
+            errorsList[name] = _getMessage('gte', gte);
           } else if (lt && !isEmpty(data?.[lt]) && numbre >= getNumbre(lt)) {
             results.status = false;
-            errorsList[name] = getMessage('lt', lt);
+            errorsList[name] = _getMessage('lt', lt);
           } else if (lte && !isEmpty(data?.[lte]) && numbre > getNumbre(lte)) {
             results.status = false;
-            errorsList[name] = getMessage('lte', lt);
+            errorsList[name] = _getMessage('lte', lt);
           } else {
             results.status = true;
             const [compareName] = [eq, ne, gt, gte, lt, lte].filter(i => i);
@@ -233,7 +242,11 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
 
   const handelOnSubmit = (
     event: FormEvent,
-    onSubmit: (status: boolean, event: FormEvent) => void
+    onSubmit: (
+      status: boolean,
+      event: FormEvent,
+      inputsErrors: Record<any, any>
+    ) => void
   ) => {
     try {
       event.preventDefault();
@@ -258,9 +271,13 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
           status[index] = results[index].status;
         }
       });
-
-      setErrors({ ...errors, ...resultsErrors });
-      return onSubmit(!(results.length === 0 || status.includes(false)), event);
+      const _errors = { ...errors, ...resultsErrors };
+      setErrors(_errors);
+      return onSubmit?.(
+        !(results.length === 0 || status.includes(false)),
+        event,
+        _errors
+      );
     } catch (error) {
       console.error(error);
     }
@@ -281,7 +298,6 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
       setErrors({
         ...errors,
         ...results.errors,
-        //[name]: results.errors[name],
       });
 
       setData({
@@ -293,10 +309,8 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
     }
   };
 
-  const RefEvent = (prevData: Record<any, any>) => {
-    const ref = refForm.current;
-    const newData: any = {};
-    if (ref && ref !== null) {
+  const RefEvent = (ref: HTMLFormElement) => {
+    try {
       const elements: Array<
         HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
       > = [
@@ -304,28 +318,63 @@ const useValidation = (inputs: Array<ValidationInputType>) => {
         ...Array.from(ref.querySelectorAll('textarea')),
         ...Array.from(ref.querySelectorAll('select')),
       ];
-      elements.map((element: any) => {
-        const { name } = element;
-        const value = prevData?.[name];
-        if (name && !isEmpty(value)) {
-          newData[name] = value;
-        }
-        return true;
+      setData((prevData: Record<any, any>) => {
+        const newData: Record<any, any> = {};
+        elements.map((element: any) => {
+          const { name } = element;
+          const value = prevData?.[name];
+          if (name) {
+            if (!isEmpty(value)) {
+              newData[name] = value;
+            }
+          }
+          return true;
+        });
+        return newData;
       });
+    } catch (error) {
+      console.error(error);
     }
-    return newData;
   };
 
   useEffect(() => {
     if (refForm.current) {
       const observer = new MutationObserver(() => {
-        setData((prev: Record<any, any>) => {
-          return RefEvent(prev);
-        });
+        RefEvent(refForm.current as HTMLFormElement);
       });
-      observer.observe(refForm.current, { childList: true, subtree: false });
+      observer.observe(refForm.current, {
+        childList: true,
+        subtree: false,
+        ...config?.mutationObserverInit,
+      });
     }
   }, []);
+
+  useEffect(() => {
+    if (Array.isArray(inputs)) {
+      const newData: Record<any, any> = {};
+      const newErrors: Record<any, any> = {};
+      const names = inputs.map(item => {
+        if (
+          !isEmpty(item?.defaultValue) &&
+          isEmpty(data?.[item?.name]) &&
+          item?.name
+        ) {
+          newData[item.name] = item.defaultValue;
+        }
+        return item.name;
+      });
+      setErrors(prevErrors => {
+        names.map(name => {
+          if (name in prevErrors) {
+            newErrors[name] = prevErrors[name];
+          }
+        });
+        return newErrors;
+      });
+      setData({ ...data, ...newData });
+    }
+  }, [inputs]);
 
   return {
     errors,

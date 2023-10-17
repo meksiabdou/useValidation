@@ -3,7 +3,7 @@ import useValidation, { ValidationInputType } from '../.';
 
 interface InputProps extends ValidationInputType {
   placeholder?: string;
-  as?: 'textarea' | 'input'
+  as?: 'textarea' | 'input';
 }
 
 const App = () => {
@@ -108,7 +108,7 @@ const App = () => {
     },
     {
       name: 'start_date',
-      type: 'date',
+      type: 'datetime-local',
       defaultValue: '',
       placeholder: 'Start Date',
       required: true,
@@ -123,38 +123,11 @@ const App = () => {
     },
     {
       name: 'end_date',
-      type: 'date',
+      type: 'datetime-local',
       defaultValue: '',
       placeholder: 'End Date',
       required: true,
       gt: 'start_date',
-      //regExp: '',
-      messages: {
-        regExp: '',
-        match: '',
-        min: '',
-        max: '',
-      },
-    },
-    {
-      name: 'start_time',
-      type: 'time',
-      defaultValue: '',
-      placeholder: 'Start Time',
-      //regExp: '',
-      messages: {
-        regExp: '',
-        match: '',
-        min: '',
-        max: '',
-      },
-    },
-    {
-      name: 'end_time',
-      type: 'time',
-      defaultValue: '',
-      placeholder: 'End Time',
-      gte: 'start_time',
       //regExp: '',
       messages: {
         regExp: '',
@@ -200,22 +173,41 @@ const App = () => {
       {
         name: name,
         type: 'text',
-        defaultValue: '',
+        defaultValue: Number((Math.random() * 1000).toFixed(0)),
         placeholder: name,
         required: true,
         regExp: /^[\d.]+$/m,
+        messages: {
+          regExp: 'The field must be a number',
+        },
       },
     ]);
   };
 
+  const deleteInput = (name: string) => {
+    setInputs(inputs.filter(item => item.name !== name));
+  };
+
+  // console.log(inputs);
+
   const onSubmit = (status: boolean) => {
-    if (status) {
+    /*if (status) {
       console.log(status, data);
     } else {
       console.log(status, errors);
+    }*/
+
+    console.log({ status, errors, data });
+  };
+
+  const getValue = (value: any, defaultValue: any) => {
+    if (value === undefined) {
+      return defaultValue || '';
+    } else {
+      return value;
     }
   };
-  
+
   return (
     <div
       style={{
@@ -242,10 +234,11 @@ const App = () => {
                 {item.as === 'textarea' ? (
                   <textarea
                     name={item.name}
-                    defaultValue={item.defaultValue}
+                    //defaultValue={item.defaultValue}
                     className={`form-control`}
                     onChange={handelOnChange}
                     placeholder={item.placeholder}
+                    value={getValue(data[item.name], item.defaultValue)}
                     //required={item.required}
                     style={{ minHeight: 100, minWidth: 200 }}
                   />
@@ -253,14 +246,22 @@ const App = () => {
                   <input
                     type={item.type}
                     name={item.name}
-                    defaultValue={item.defaultValue}
+                    //defaultValue={item.defaultValue}
                     className={`form-control`}
                     onChange={handelOnChange}
                     placeholder={item.placeholder}
+                    value={getValue(data[item.name], item.defaultValue)}
                     //required={item.required}
                     style={{ minHeight: 35, width: 200 }}
                   />
                 )}
+                <button
+                  onClick={() => deleteInput(item.name)}
+                  style={{ margin: '0 5px' }}
+                  type="button"
+                >
+                  Delete
+                </button>
               </div>
               <p
                 className="error form-text"
