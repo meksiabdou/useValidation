@@ -168,7 +168,7 @@ const App = () => {
   ];
 
   const { errors, handelOnSubmit, handelOnChange, data } = useValidation(
-    inputs
+    useMemo(() => inputs, [inputs])
   );
 
   const onSubmit = (status: boolean) => {

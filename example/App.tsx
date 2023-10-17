@@ -158,7 +158,7 @@ const App = () => {
     refForm,
     handelOnChange,
     data,
-  } = useValidation(inputs);
+  } = useValidation(React.useMemo(() => inputs, [inputs]));
 
   /*const errors: any = {};
   const handelOnSubmit = (s: any, e: any) => null;
