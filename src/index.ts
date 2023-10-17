@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import React, { useState, useRef, useEffect, FormEvent } from 'react';
 import { isEmpty, stringToNumbre } from './utils/utils';
 
@@ -270,6 +271,7 @@ const useValidation = (
           resultsErrors[name] = results?.[index]?.['errors']?.[name];
           status[index] = results[index].status;
         }
+        return true;
       });
       const _errors = { ...errors, ...resultsErrors };
       setErrors(_errors);
@@ -348,6 +350,7 @@ const useValidation = (
         ...config?.mutationObserverInit,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -369,11 +372,13 @@ const useValidation = (
           if (name in prevErrors) {
             newErrors[name] = prevErrors[name];
           }
+          return true;
         });
         return newErrors;
       });
       setData({ ...data, ...newData });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputs]);
 
   return {
