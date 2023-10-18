@@ -320,17 +320,27 @@ const useValidation = (
         ...Array.from(ref.querySelectorAll('textarea')),
         ...Array.from(ref.querySelectorAll('select')),
       ];
+      const newErrors: Record<any, any> = {};
       setData((prevData: Record<any, any>) => {
         const newData: Record<any, any> = {};
-        elements.map((element: any) => {
-          const { name } = element;
-          const value = prevData?.[name];
+        const names = elements.map((element: any) => {
+          const { name, value: defaultValue } = element;
+          const value = prevData?.[name] || defaultValue;
           if (name) {
             if (!isEmpty(value)) {
               newData[name] = value;
             }
           }
-          return true;
+          return name;
+        });
+        setErrors(prevErrors => {
+          names.map(name => {
+            if (name in prevErrors) {
+              newErrors[name] = prevErrors[name];
+            }
+            return true;
+          });
+          return newErrors;
         });
         return newData;
       });
@@ -356,8 +366,7 @@ const useValidation = (
   useEffect(() => {
     if (Array.isArray(inputs)) {
       const newData: Record<any, any> = {};
-      const newErrors: Record<any, any> = {};
-      const names = inputs.map(item => {
+      inputs.map(item => {
         if (
           !isEmpty(item?.defaultValue) &&
           isEmpty(data?.[item?.name]) &&
@@ -367,19 +376,10 @@ const useValidation = (
         }
         return item.name;
       });
-      setErrors(prevErrors => {
-        names.map(name => {
-          if (name in prevErrors) {
-            newErrors[name] = prevErrors[name];
-          }
-          return true;
-        });
-        return newErrors;
-      });
       setData({ ...data, ...newData });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputs]);
+  }, []);
 
   return {
     errors,
