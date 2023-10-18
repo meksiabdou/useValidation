@@ -197,7 +197,9 @@ const App = () => {
       console.log(status, errors);
     }*/
 
-    console.log({ status, errors, data });
+    console.log({ status });
+    console.log(errors);
+    console.log(data);
   };
 
   const getValue = (value: any, defaultValue: any) => {
