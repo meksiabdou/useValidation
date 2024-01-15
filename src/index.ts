@@ -188,18 +188,6 @@ const useValidation = (
             '{max}',
             Math.abs(maxLength as any).toString()
           );
-        } else if (!isEmpty(min) && !(Number(value) >= (min as any))) {
-          results.status = false;
-          errorsList[name] = _getMessage('min').replace(
-            '{min}',
-            (min as any).toString()
-          );
-        } else if (!isEmpty(max) && !(Number(value) <= (max as any))) {
-          results.status = false;
-          errorsList[name] = _getMessage('max').replace(
-            '{max}',
-            (max as any).toString()
-          );
         } else if (match && data?.[match] && value !== data?.[match]) {
           results.status = false;
           errorsList[name] = _getMessage('match').replace(
@@ -339,12 +327,13 @@ const useValidation = (
         ...Array.from(ref.querySelectorAll('select')),
       ];
       const newErrors: Record<any, any> = {};
+      const names = inputs.map(item => item.name);
       setData((prevData: Record<any, any>) => {
         const newData: Record<any, any> = {};
-        const names = elements.map((element: any) => {
+        elements.map((element: any) => {
           const { name, value: defaultValue } = element;
           const value = prevData?.[name] || defaultValue;
-          if (name) {
+          if (name && names.includes(name)) {
             if (!isEmpty(value)) {
               newData[name] = value;
             }
