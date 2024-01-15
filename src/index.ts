@@ -135,6 +135,15 @@ const useValidation = (
           return getMessage(key, fieldName, messages as any);
         };
 
+        const getNumbre = (key: any) => {
+          if (key in data && typeof key === 'string') {
+            return stringToNumbre({ value: data?.[key], type }) as any;
+          }
+          return stringToNumbre({ value: key, type }) as any;
+        };
+
+        const numbre: any = stringToNumbre({ value, type });
+
         const regExp = field?.regExp || (field as any)?.regex;
 
         if (required && isEmpty(value)) {
@@ -197,10 +206,7 @@ const useValidation = (
             '{match}',
             match.toString()
           );
-        } else if (!isEmpty(stringToNumbre({ value, type }))) {
-          const numbre: any = stringToNumbre({ value, type });
-          const getNumbre = (key: any) =>
-            stringToNumbre({ value: data?.[key], type }) as any;
+        } else if (!isEmpty(numbre)) {
           if (eq && !isEmpty(data?.[eq]) && numbre !== getNumbre(eq)) {
             results.status = false;
             errorsList[name] = _getMessage('eq', eq);
@@ -219,6 +225,18 @@ const useValidation = (
           } else if (lte && !isEmpty(data?.[lte]) && numbre > getNumbre(lte)) {
             results.status = false;
             errorsList[name] = _getMessage('lte', lt);
+          } else if (!isEmpty(min) && !(numbre >= (min as any))) {
+            results.status = false;
+            errorsList[name] = _getMessage('min').replace(
+              '{min}',
+              (min as any).toString()
+            );
+          } else if (!isEmpty(max) && !(numbre <= (max as any))) {
+            results.status = false;
+            errorsList[name] = _getMessage('max').replace(
+              '{max}',
+              (max as any).toString()
+            );
           } else {
             results.status = true;
             const [compareName] = [eq, ne, gt, gte, lt, lte].filter(i => i);
