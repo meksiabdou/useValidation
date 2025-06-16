@@ -1,6 +1,5 @@
-/* eslint-disable no-useless-escape */
-import React, { useState, useRef, useEffect, FormEvent } from 'react';
-import { isEmpty, stringToNumbre } from './utils/utils';
+import { useState, useRef, useEffect, FormEvent, ChangeEvent } from 'react';
+import { isEmpty, stringToNumber } from './utils/utils';
 
 type ValidationParams =
   | 'regExp'
@@ -17,17 +16,13 @@ export type MessagesType = Record<
   ValidationParams | ValidationOperators,
   string
 >;
-
 export interface ValidationInputType {
   name: string;
   type?: string;
   defaultValue?: any;
-  //value?: any;
-  // placeholder?: string;
-  //regex?: RegExp;
   regExp?: RegExp;
-  min?: number;
-  max?: number;
+  min?: number | string | Date;
+  max?: number | string | Date;
   minLength?: number;
   maxLength?: number;
   required?: boolean;
@@ -39,7 +34,6 @@ export interface ValidationInputType {
   lt?: string;
   lte?: string;
   messages?: {
-    //regex?: string;
     regExp?: string;
     min?: string;
     max?: string;
@@ -72,11 +66,18 @@ const defaultMessages: MessagesType = {
   lte: 'Be sure to less than or equal to {field}',
 };
 
-const defaultRegex: { email: any; phone: any; url: any } = {
+export const defaultValidationRegex: {
+  email: any;
+  phone: any;
+  url: any;
+  password: any;
+} = {
   email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
   phone: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im,
   url: /(\b(https?):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/i,
+  password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&\_\-\x20-\x7E])[A-Za-z\d\W\_\-\x20-\x7E]{8,}$/,
 };
+
 const useValidation = (
   inputs: Array<ValidationInputType>,
   config: { mutationObserverInit?: MutationObserverInit } = {}
@@ -114,12 +115,9 @@ const useValidation = (
         const {
           required,
           match,
-          max,
-          min,
           maxLength,
           minLength,
           messages,
-          // regex,
           eq,
           ne,
           gt,
@@ -135,16 +133,21 @@ const useValidation = (
           return getMessage(key, fieldName, messages as any);
         };
 
-        const getNumbre = (key: any) => {
+        const getNumber = (key: any) => {
           if (key in data && typeof key === 'string') {
-            return stringToNumbre({ value: data?.[key], type }) as any;
+            return stringToNumber({ value: data?.[key], type }) as any;
           }
-          return stringToNumbre({ value: key, type }) as any;
+          return stringToNumber({ value: key, type }) as any;
         };
 
-        const numbre: any = stringToNumbre({ value, type });
+        const max = stringToNumber({ value: field?.max, type });
+        const min = stringToNumber({ value: field?.min, type });
+        const number = stringToNumber({ value, type }) as number;
 
-        const regExp = field?.regExp || (field as any)?.regex;
+        const regExp =
+          field?.regExp ||
+          (defaultValidationRegex as any)?.[field?.name] ||
+          (defaultValidationRegex as any)?.[type];
 
         if (required && isEmpty(value)) {
           results.status = false;
@@ -162,12 +165,7 @@ const useValidation = (
           if (name in errorsList) {
             delete errorsList[name];
           }
-        } else if (
-          (regExp || (defaultRegex as any)?.[field?.name]) &&
-          !new RegExp(regExp || (defaultRegex as any)?.[field?.name]).test(
-            value
-          )
-        ) {
+        } else if (regExp && !new RegExp(regExp).test(value)) {
           results.status = false;
           errorsList[name] = _getMessage('regExp');
         } else if (
@@ -194,32 +192,32 @@ const useValidation = (
             '{match}',
             match.toString()
           );
-        } else if (!isEmpty(numbre)) {
-          if (eq && !isEmpty(data?.[eq]) && numbre !== getNumbre(eq)) {
+        } else if (!isEmpty(number)) {
+          if (eq && !isEmpty(data?.[eq]) && number !== getNumber(eq)) {
             results.status = false;
             errorsList[name] = _getMessage('eq', eq);
-          } else if (ne && !isEmpty(data?.[ne]) && numbre === getNumbre(ne)) {
+          } else if (ne && !isEmpty(data?.[ne]) && number === getNumber(ne)) {
             results.status = false;
             errorsList[name] = _getMessage('ne', ne);
-          } else if (gt && !isEmpty(data?.[gt]) && numbre <= getNumbre(gt)) {
+          } else if (gt && !isEmpty(data?.[gt]) && number <= getNumber(gt)) {
             results.status = false;
             errorsList[name] = _getMessage('gt', gt);
-          } else if (gte && !isEmpty(data?.[gte]) && numbre < getNumbre(gte)) {
+          } else if (gte && !isEmpty(data?.[gte]) && number < getNumber(gte)) {
             results.status = false;
             errorsList[name] = _getMessage('gte', gte);
-          } else if (lt && !isEmpty(data?.[lt]) && numbre >= getNumbre(lt)) {
+          } else if (lt && !isEmpty(data?.[lt]) && number >= getNumber(lt)) {
             results.status = false;
             errorsList[name] = _getMessage('lt', lt);
-          } else if (lte && !isEmpty(data?.[lte]) && numbre > getNumbre(lte)) {
+          } else if (lte && !isEmpty(data?.[lte]) && number > getNumber(lte)) {
             results.status = false;
             errorsList[name] = _getMessage('lte', lt);
-          } else if (!isEmpty(min) && !(numbre >= (min as any))) {
+          } else if (!isEmpty(min) && !(number >= (min as any))) {
             results.status = false;
             errorsList[name] = _getMessage('min').replace(
               '{min}',
               (min as any).toString()
             );
-          } else if (!isEmpty(max) && !(numbre <= (max as any))) {
+          } else if (!isEmpty(max) && !(number <= (max as any))) {
             results.status = false;
             errorsList[name] = _getMessage('max').replace(
               '{max}',
@@ -247,7 +245,7 @@ const useValidation = (
     }
   };
 
-  const handelOnSubmit = (
+  const handleOnSubmit = (
     event: FormEvent,
     onSubmit: (
       status: boolean,
@@ -291,8 +289,8 @@ const useValidation = (
     }
   };
 
-  const handelOnChange = (
-    event: React.ChangeEvent<
+  const handleOnChange = (
+    event: ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
@@ -392,8 +390,8 @@ const useValidation = (
     errors,
     setErrors,
     refForm,
-    handelOnSubmit,
-    handelOnChange,
+    handleOnSubmit,
+    handleOnChange,
     setData,
     RefEvent,
     data,

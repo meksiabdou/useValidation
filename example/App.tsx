@@ -20,8 +20,8 @@ const App = () => {
       },
     },
     {
-      name: 'email',
-      type: 'text',
+      name: 'user-email',
+      type: 'email',
       placeholder: 'E-mail',
       defaultValue: '',
       regExp: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
@@ -112,6 +112,7 @@ const App = () => {
       defaultValue: '',
       placeholder: 'Start Date',
       required: true,
+      min: '2025-06-01',
       lt: 'end_date',
       //regExp: '',
       messages: {
@@ -126,6 +127,7 @@ const App = () => {
       type: 'datetime-local',
       defaultValue: '',
       placeholder: 'End Date',
+      max: new Date(),
       required: true,
       gt: 'start_date',
       //regExp: '',
@@ -154,17 +156,17 @@ const App = () => {
 
   const {
     errors,
-    handelOnSubmit,
+    handleOnSubmit,
     refForm,
-    handelOnChange,
+    handleOnChange,
     data,
   } = useValidation(React.useMemo(() => inputs, [inputs]));
 
   /*const errors: any = {};
-  const handelOnSubmit = (s: any, e: any) => null;
+  const handleOnSubmit = (s: any, e: any) => null;
   const refForm = React.useRef<any>(null)
   const data: any = {};
-  const handelOnChange = (e: any) => null;*/
+  const handleOnChange = (e: any) => null;*/
 
   const addNewInput = () => {
     const name = 'input_' + Number((Math.random() * 1000).toFixed(0));
@@ -188,15 +190,7 @@ const App = () => {
     setInputs(inputs.filter(item => item.name !== name));
   };
 
-  // console.log(inputs);
-
   const onSubmit = (status: boolean) => {
-    /*if (status) {
-      console.log(status, data);
-    } else {
-      console.log(status, errors);
-    }*/
-
     console.log({ status });
     console.log(errors);
     console.log(data);
@@ -219,7 +213,7 @@ const App = () => {
         justifyContent: 'center',
       }}
     >
-      <form onSubmit={event => handelOnSubmit(event, onSubmit)} ref={refForm}>
+      <form onSubmit={event => handleOnSubmit(event, onSubmit)} ref={refForm} noValidate>
         <div className="title">
           <h4>{'Form'}</h4>
         </div>
@@ -238,7 +232,7 @@ const App = () => {
                     name={item.name}
                     //defaultValue={item.defaultValue}
                     className={`form-control`}
-                    onChange={handelOnChange}
+                    onChange={handleOnChange}
                     placeholder={item.placeholder}
                     value={getValue(data[item.name], item.defaultValue)}
                     //required={item.required}
@@ -250,7 +244,7 @@ const App = () => {
                     name={item.name}
                     //defaultValue={item.defaultValue}
                     className={`form-control`}
-                    onChange={handelOnChange}
+                    onChange={handleOnChange}
                     placeholder={item.placeholder}
                     value={getValue(data[item.name], item.defaultValue)}
                     //required={item.required}

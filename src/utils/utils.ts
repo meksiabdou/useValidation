@@ -23,12 +23,12 @@ export const isEmpty = (value: any): boolean => {
 };
 
 /**
- * @method stringToNumbre
+ * @method stringToNumber
  * @param {{value: any, type: any}}
  * @returns {number | undefined} true & false
- * @description stringToNumbre convert time & date to number
+ * @description stringToNumber convert time & date to number
  */
-export const stringToNumbre = ({
+export const stringToNumber = ({
   value,
   type,
 }: {
@@ -36,11 +36,18 @@ export const stringToNumbre = ({
   type?: any;
 }): number | undefined => {
   try {
-    if (['datetime-local', 'date', 'time'].includes(type?.toLowerCase())) {
-      if (type === 'time') {
+    if (
+      value &&
+      type &&
+      ['datetime-local', 'date', 'time'].includes(type?.toLowerCase?.())
+    ) {
+      if (
+        type === 'time' &&
+        new RegExp(/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/).test(value)
+      ) {
         value = `2000-01-01 ${value}`;
       }
-      const date = new Date(value);
+      const date = new Date(value.toString());
       value = date.getTime();
     }
     if (!isNaN(Number(value))) {
@@ -48,7 +55,6 @@ export const stringToNumbre = ({
     }
     return undefined;
   } catch (error) {
-    //console.log(error);
     return undefined;
   }
 };
