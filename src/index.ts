@@ -144,10 +144,7 @@ const useValidation = (
         const min = stringToNumber({ value: field?.min, type });
         const number = stringToNumber({ value, type }) as number;
 
-        const regExp =
-          field?.regExp ||
-          (defaultValidationRegex as any)?.[field?.name] ||
-          (defaultValidationRegex as any)?.[type];
+        const regExp = field?.regExp;
 
         if (required && isEmpty(value)) {
           results.status = false;

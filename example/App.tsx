@@ -1,5 +1,8 @@
 import * as React from 'react';
-import useValidation, { ValidationInputType } from '../.';
+import useValidation, {
+  ValidationInputType,
+  defaultValidationRegex,
+} from '../.';
 
 interface InputProps extends ValidationInputType {
   placeholder?: string;
@@ -24,7 +27,7 @@ const App = () => {
       type: 'email',
       placeholder: 'E-mail',
       defaultValue: '',
-      regExp: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+      regExp: defaultValidationRegex.email,
       required: true,
       messages: {
         required: '',
@@ -36,7 +39,7 @@ const App = () => {
       type: 'text',
       placeholder: 'Phone',
       defaultValue: '0552000000',
-      regExp: /^[0]{1}[5-7]{1}[0-9]{8}$/m,
+      regExp: defaultValidationRegex.phone,
       required: true,
       messages: {
         required: '',
@@ -46,6 +49,7 @@ const App = () => {
     {
       name: 'password',
       type: 'password',
+      regExp: defaultValidationRegex.password,
       defaultValue: '',
       placeholder: 'Password',
       required: true,
@@ -213,7 +217,11 @@ const App = () => {
         justifyContent: 'center',
       }}
     >
-      <form onSubmit={event => handleOnSubmit(event, onSubmit)} ref={refForm} noValidate>
+      <form
+        onSubmit={event => handleOnSubmit(event, onSubmit)}
+        ref={refForm}
+        noValidate
+      >
         <div className="title">
           <h4>{'Form'}</h4>
         </div>
