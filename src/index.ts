@@ -67,15 +67,73 @@ const defaultMessages: MessagesType = {
 };
 
 export const defaultValidationRegex: {
-  email: any;
-  phone: any;
-  url: any;
-  password: any;
+  email: RegExp;
+  phone: RegExp;
+  url: RegExp;
+  password: RegExp;
+  int: RegExp;
+  float: RegExp;
+  number: RegExp;
+  boolean: RegExp;
+  string: RegExp;
+  uppercase: RegExp;
+  lowercase: RegExp;
+  uuid: RegExp;
+  slug: RegExp;
+  currency: RegExp;
+  jwt: RegExp;
+  base64: RegExp;
+  base64url: RegExp;
+  ipv4: RegExp;
+  ipv4Cidr: RegExp;
+  ipv6: RegExp;
+  ipv6Cidr: RegExp;
+  mac: RegExp;
+  date: RegExp;
+  time: RegExp;
+  datetime: RegExp;
+  hexColor: RegExp;
+  objectId: RegExp;
+  creditCard: RegExp;
+  username: RegExp;
+  youtubeUrl: RegExp;
+  emoji: RegExp;
 } = {
-  email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-  phone: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im,
-  url: /(\b(https?):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/i,
-  password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&\_\-\x20-\x7E])[A-Za-z\d\W\_\-\x20-\x7E]{8,}$/,
+  email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+  phone: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+  url: /^(https?:\/\/[^\s/$.?#].[^\s]*)$/i,
+  password:
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&_\-\x20-\x7E])[A-Za-z\d\W_\-\x20-\x7E]{8,}$/,
+  int: /^-?\d+$/,
+  float: /^-?\d+(\.\d+)?$/,
+  number: /^-?\d+(\.\d+)?$/,
+  boolean: /^(true|false)$/i,
+  string: /^.+$/gm,
+  uppercase: /^[\p{Lu}\p{Lt}]+$/u,
+  lowercase: /^[\p{Ll}\p{Lm}]+$/u,
+  uuid: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+  slug: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+  currency: /^(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d{2})?$/,
+  jwt: /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/,
+  base64: /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/,
+  base64url: /^(?:[A-Za-z0-9-_]{4})*(?:[A-Za-z0-9-_]{2}==|[A-Za-z0-9-_]{3}=)?$/,
+  ipv4: /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/,
+  ipv4Cidr:
+    /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\/([0-9]|[12][0-9]|3[0-2])$/,
+  ipv6: /^(([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:)((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))$/,
+  ipv6Cidr: /^[0-9a-f:]+\/\d{1,3}$/i,
+  mac: /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/,
+  date: /^\d{4}-\d{2}-\d{2}$/,
+  time: /^([01]\d|2[0-3]):([0-5]\d)(:([0-5]\d))?$/,
+  datetime:
+    /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):([0-5]\d)(:([0-5]\d))?(\.\d+)?(Z|([+-]([01]\d|2[0-3]):([0-5]\d)))?$/,
+  hexColor: /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
+  objectId: /^[a-f\d]{24}$/i,
+  creditCard:
+    /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})$/,
+  username: /^(?=.{3,20}$)[a-zA-Z0-9._-]+$/,
+  youtubeUrl: /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i,
+  emoji: /\p{Emoji}/u,
 };
 
 const useValidation = (
@@ -109,7 +167,7 @@ const useValidation = (
     const results = { status: false, errors: errorsList };
     try {
       const [field] = inputs.filter(
-        item => item.name.toLowerCase() === name?.toLowerCase()
+        (item) => item.name.toLowerCase() === name?.toLowerCase()
       );
       if (field) {
         const {
@@ -222,7 +280,7 @@ const useValidation = (
             );
           } else {
             results.status = true;
-            const [compareName] = [eq, ne, gt, gte, lt, lte].filter(i => i);
+            const [compareName] = [eq, ne, gt, gte, lt, lte].filter((i) => i);
             if (compareName) {
               errorsList[compareName] = undefined;
             }
@@ -263,7 +321,7 @@ const useValidation = (
       const results: Array<{ status: boolean; errors: Record<any, any> }> = [];
       const status: Array<boolean> = [];
       const resultsErrors: any = {};
-      const names = inputs.map(item => item.name);
+      const names = inputs.map((item) => item.name);
 
       elements.map((element, index) => {
         const { value, name, type } = element;
@@ -322,7 +380,7 @@ const useValidation = (
         ...Array.from(ref.querySelectorAll('select')),
       ];
       const newErrors: Record<any, any> = {};
-      const names = inputs.map(item => item.name);
+      const names = inputs.map((item) => item.name);
       setData((prevData: Record<any, any>) => {
         const newData: Record<any, any> = {};
         elements.map((element: any) => {
@@ -335,8 +393,8 @@ const useValidation = (
           }
           return name;
         });
-        setErrors(prevErrors => {
-          names.map(name => {
+        setErrors((prevErrors) => {
+          names.map((name) => {
             if (name in prevErrors) {
               newErrors[name] = prevErrors[name];
             }
@@ -368,7 +426,7 @@ const useValidation = (
   useEffect(() => {
     if (Array.isArray(inputs)) {
       const newData: Record<any, any> = {};
-      inputs.map(item => {
+      inputs.map((item) => {
         if (
           !isEmpty(item?.defaultValue) &&
           isEmpty(data?.[item?.name]) &&

@@ -22,6 +22,17 @@ const App = () => {
         required: 'the field is required',
       },
     },
+     {
+      name: 'username',
+      type: 'text',
+      defaultValue: 'mohamed92',
+      placeholder: 'Username',
+      required: true,
+      regExp: defaultValidationRegex.username,
+      messages: {
+        required: 'the field is required',
+      },
+    },
     {
       name: 'user-email',
       type: 'email',
@@ -30,7 +41,6 @@ const App = () => {
       regExp: defaultValidationRegex.email,
       required: true,
       messages: {
-        required: '',
         regExp: 'the field is invalid',
       },
     },
@@ -42,7 +52,6 @@ const App = () => {
       regExp: defaultValidationRegex.phone,
       required: true,
       messages: {
-        required: '',
         regExp: 'رقم الهاتف غير الصالح',
       },
     },
@@ -53,17 +62,8 @@ const App = () => {
       defaultValue: '',
       placeholder: 'Password',
       required: true,
-      //regExp: '',
       minLength: -8,
       maxLength: 20,
-      messages: {
-        required: '',
-        regExp: '',
-        min: '',
-        max: '',
-        minLength: '',
-        maxLength: '',
-      },
     },
     {
       name: 'confirm-password',
@@ -71,12 +71,7 @@ const App = () => {
       defaultValue: '',
       placeholder: 'confirm password',
       required: true,
-      //regExp: '',
       match: 'password',
-      messages: {
-        regExp: '',
-        match: '',
-      },
     },
     {
       name: 'buying_price',
@@ -84,15 +79,9 @@ const App = () => {
       defaultValue: '',
       required: true,
       placeholder: 'Buying price',
-      //regExp: '',
+      regExp: defaultValidationRegex.currency,
       min: -10,
       max: 20,
-      messages: {
-        regExp: '',
-        match: '',
-        min: '',
-        max: '',
-      },
     },
     {
       name: 'selling_price',
@@ -100,15 +89,11 @@ const App = () => {
       defaultValue: '',
       required: true,
       placeholder: 'Selling price',
+      regExp: defaultValidationRegex.currency,
       gte: 'buying_price',
       min: 8,
       max: 20,
-      messages: {
-        regExp: '',
-        match: '',
-        min: '',
-        max: '',
-      },
+
     },
     {
       name: 'start_date',
@@ -118,13 +103,6 @@ const App = () => {
       required: true,
       min: '2025-06-01',
       lt: 'end_date',
-      //regExp: '',
-      messages: {
-        regExp: '',
-        match: '',
-        min: '',
-        max: '',
-      },
     },
     {
       name: 'end_date',
@@ -134,25 +112,13 @@ const App = () => {
       max: new Date(),
       required: true,
       gt: 'start_date',
-      //regExp: '',
-      messages: {
-        regExp: '',
-        match: '',
-        min: '',
-        max: '',
-      },
     },
     {
       name: 'message',
       as: 'textarea',
       defaultValue: '',
       placeholder: 'Message',
-      //regExp: '',
-      messages: {
-        required: '',
-        regExp: '',
-        match: '',
-      },
+      regExp: defaultValidationRegex.string,
     },
   ];
 
@@ -278,7 +244,7 @@ const App = () => {
         })}
         <br />
         <button type="submit" className="btn btn-default btn-submit">
-          login
+          Submit
         </button>
         <br />
         <br />
